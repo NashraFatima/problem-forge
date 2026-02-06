@@ -1,41 +1,49 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Zap, Mail, Lock, Shield } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Zap, Mail, Lock, Shield, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/components/ui/sonner";
+import { ApiError } from "@/lib/api";
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
-  const { login, setMockRole } = useAuth();
-  const { toast } = useToast();
+  const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+    setError(null);
+
     try {
-      await login(email, password, 'admin');
-      toast({ title: 'Welcome back, Admin!', description: 'You have successfully logged in.' });
-      navigate('/admin');
-    } catch (error) {
-      toast({ title: 'Error', description: 'Invalid credentials', variant: 'destructive' });
+      await login(email, password, "admin");
+      toast.success("Welcome back, Admin!", {
+        description: "You have successfully logged in.",
+      });
+      navigate("/admin");
+    } catch (err) {
+      const message =
+        err instanceof ApiError ? err.message : "Invalid credentials";
+      setError(message);
+      toast.error("Login Failed", { description: message });
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleDemoLogin = () => {
-    setMockRole('admin');
-    toast({ title: 'Demo Mode', description: 'Logged in as demo admin.' });
-    navigate('/admin');
   };
 
   return (
@@ -101,23 +109,23 @@ export default function AdminLoginPage() {
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Signing in...' : 'Sign In'}
+                {isLoading ? "Signing in..." : "Sign In"}
               </Button>
 
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={handleDemoLogin}
-              >
-                Continue with Demo Admin
-              </Button>
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
             </form>
           </CardContent>
         </Card>
 
         <p className="text-center text-xs text-muted-foreground mt-6">
-          <Link to="/" className="hover:underline">Back to Home</Link>
+          <Link to="/" className="hover:underline">
+            Back to Home
+          </Link>
         </p>
       </motion.div>
     </div>

@@ -1,36 +1,81 @@
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowRight, Building2, Users, Zap, Award, Globe, Code, Cpu } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { mockProblems } from '@/data/mockData';
-
-const stats = [
-  { label: 'Problem Statements', value: '50+', icon: Code },
-  { label: 'Partner Organizations', value: '25+', icon: Building2 },
-  { label: 'Participants', value: '1000+', icon: Users },
-  { label: 'Categories', value: '12', icon: Award },
-];
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import {
+  ArrowRight,
+  Building2,
+  Users,
+  Zap,
+  Award,
+  Globe,
+  Code,
+  Cpu,
+  Loader2,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { api } from "@/lib/api";
 
 const features = [
   {
-    title: 'Real-World Challenges',
-    description: 'Work on actual industry problems from leading companies, startups, and research labs.',
+    title: "Real-World Challenges",
+    description:
+      "Work on actual industry problems from leading companies, startups, and research labs.",
     icon: Globe,
   },
   {
-    title: 'Software & Hardware Tracks',
-    description: 'Choose from AI, FinTech, IoT, Robotics, and many more specialized categories.',
+    title: "Software & Hardware Tracks",
+    description:
+      "Choose from AI, FinTech, IoT, Robotics, and many more specialized categories.",
     icon: Cpu,
   },
   {
-    title: 'Expert Mentorship',
-    description: 'Get guidance from industry professionals throughout your hackathon journey.',
+    title: "Expert Mentorship",
+    description:
+      "Get guidance from industry professionals throughout your DevThon journey.",
     icon: Award,
   },
 ];
 
 export default function HomePage() {
-  const featuredProblems = mockProblems.filter(p => p.featured && p.status === 'approved').slice(0, 3);
+  // Fetch featured problems first, fall back to recent if none
+  const { data: featuredProblems = [], isLoading: loadingFeatured } = useQuery({
+    queryKey: ["problems", "featured"],
+    queryFn: () => api.problems.getFeatured(),
+  });
+
+  const { data: recentProblems = [], isLoading: loadingRecent } = useQuery({
+    queryKey: ["problems", "recent"],
+    queryFn: () => api.problems.getRecent(6),
+  });
+
+  const { data: publicStats } = useQuery({
+    queryKey: ["problems", "stats", "public"],
+    queryFn: () => api.problems.getPublicStats(),
+  });
+
+  // Use featured if available, otherwise show recent approved problems
+  const displayProblems =
+    featuredProblems.length > 0 ? featuredProblems : recentProblems;
+  const isLoading = loadingFeatured || loadingRecent;
+
+  const stats = [
+    {
+      label: "Problem Statements",
+      value: publicStats ? `${publicStats.totalProblems}+` : "50+",
+      icon: Code,
+    },
+    {
+      label: "Partner Organizations",
+      value: publicStats ? `${publicStats.totalOrganizations}+` : "25+",
+      icon: Building2,
+    },
+    { label: "Participants", value: "1000+", icon: Users },
+    {
+      label: "Categories",
+      value: publicStats ? `${publicStats.totalCategories}` : "12",
+      icon: Award,
+    },
+  ];
 
   return (
     <div className="min-h-screen">
@@ -39,7 +84,7 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
-        
+
         <div className="container relative">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -51,17 +96,17 @@ export default function HomePage() {
               <Zap className="h-4 w-4" />
               Industry x Student Collaboration
             </div>
-            
+
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold tracking-tight mb-6">
-              Solve{' '}
-              <span className="gradient-text">Real Problems</span>
+              Solve <span className="gradient-text">Real Problems</span>
               <br />
               Build Real Impact
             </h1>
-            
+
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-              Connect with leading organizations and tackle industry-grade challenges. 
-              Choose from software and hardware tracks designed for the next generation of innovators.
+              Connect with leading organizations and tackle industry-grade
+              challenges. Choose from software and hardware tracks designed for
+              the next generation of innovators.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -71,7 +116,12 @@ export default function HomePage() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="text-base px-8">
+              <Button
+                size="lg"
+                variant="outline"
+                asChild
+                className="text-base px-8"
+              >
                 <Link to="/org/register">
                   <Building2 className="mr-2 h-5 w-5" />
                   Submit a Challenge
@@ -97,8 +147,12 @@ export default function HomePage() {
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 mb-4">
                   <stat.icon className="h-6 w-6 text-primary" />
                 </div>
-                <p className="text-3xl md:text-4xl font-display font-bold text-foreground">{stat.value}</p>
-                <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+                <p className="text-3xl md:text-4xl font-display font-bold text-foreground">
+                  {stat.value}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {stat.label}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -113,7 +167,8 @@ export default function HomePage() {
               Why Participate?
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Join a platform that bridges the gap between academic learning and industry needs.
+              Join a platform that bridges the gap between academic learning and
+              industry needs.
             </p>
           </div>
 
@@ -129,7 +184,9 @@ export default function HomePage() {
                 <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4">
                   <feature.icon className="h-6 w-6 text-accent" />
                 </div>
-                <h3 className="text-xl font-display font-semibold mb-2">{feature.title}</h3>
+                <h3 className="text-xl font-display font-semibold mb-2">
+                  {feature.title}
+                </h3>
                 <p className="text-muted-foreground">{feature.description}</p>
               </motion.div>
             ))}
@@ -137,16 +194,20 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Problems */}
+      {/* Featured/Recent Problems */}
       <section className="py-20 bg-muted/30">
         <div className="container">
           <div className="flex items-center justify-between mb-12">
             <div>
               <h2 className="text-3xl md:text-4xl font-display font-bold mb-2">
-                Featured Challenges
+                {featuredProblems.length > 0
+                  ? "Featured Challenges"
+                  : "Latest Challenges"}
               </h2>
               <p className="text-muted-foreground">
-                Hand-picked problem statements from our partner organizations
+                {featuredProblems.length > 0
+                  ? "Hand-picked problem statements from our partner organizations"
+                  : "Recent problem statements from our partner organizations"}
               </p>
             </div>
             <Button variant="outline" asChild>
@@ -158,49 +219,67 @@ export default function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {featuredProblems.map((problem, index) => (
-              <motion.div
-                key={problem.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
-              >
-                <Link
-                  to={`/problems/${problem.id}`}
-                  className="block p-6 rounded-2xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all group"
-                >
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      problem.track === 'software' ? 'track-badge-software' : 'track-badge-hardware'
-                    }`}>
-                      {problem.track === 'software' ? 'Software' : 'Hardware'}
-                    </span>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      problem.difficulty === 'easy' ? 'bg-success-light text-success-foreground' :
-                      problem.difficulty === 'medium' ? 'bg-warning-light text-warning-foreground' :
-                      'bg-destructive/10 text-destructive'
-                    }`}>
-                      {problem.difficulty.charAt(0).toUpperCase() + problem.difficulty.slice(1)}
-                    </span>
-                  </div>
-                  
-                  <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                    {problem.title}
-                  </h3>
-                  
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                    {problem.description}
-                  </p>
+            {isLoading
+              ? [1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="h-48 rounded-2xl bg-muted animate-pulse"
+                  />
+                ))
+              : displayProblems.slice(0, 6).map((problem, index) => (
+                  <motion.div
+                    key={problem.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
+                  >
+                    <Link
+                      to={`/problems/${problem.id}`}
+                      className="block p-6 rounded-2xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all group"
+                    >
+                      <div className="flex items-center gap-2 mb-4">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            problem.track === "software"
+                              ? "track-badge-software"
+                              : "track-badge-hardware"
+                          }`}
+                        >
+                          {problem.track === "software"
+                            ? "Software"
+                            : "Hardware"}
+                        </span>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            problem.difficulty === "easy"
+                              ? "bg-success-light text-success-foreground"
+                              : problem.difficulty === "medium"
+                                ? "bg-warning-light text-warning-foreground"
+                                : "bg-destructive/10 text-destructive"
+                          }`}
+                        >
+                          {problem.difficulty.charAt(0).toUpperCase() +
+                            problem.difficulty.slice(1)}
+                        </span>
+                      </div>
 
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      {problem.organizationName}
-                    </span>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+                      <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                        {problem.title}
+                      </h3>
+
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                        {problem.description}
+                      </p>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">
+                          {problem.organization.name}
+                        </span>
+                        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
           </div>
         </div>
       </section>
@@ -208,18 +287,25 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-20">
         <div className="container">
-          <div className="relative rounded-3xl overflow-hidden p-12 md:p-16 text-center"
-            style={{ background: 'var(--gradient-hero)' }}
+          <div
+            className="relative rounded-3xl overflow-hidden p-12 md:p-16 text-center"
+            style={{ background: "var(--gradient-hero)" }}
           >
             <div className="relative z-10">
               <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">
                 Have a Challenge for Students?
               </h2>
               <p className="text-white/80 max-w-2xl mx-auto mb-8">
-                Organizations of all sizes can submit problem statements. Connect with talented students
-                and get fresh perspectives on your real-world challenges.
+                Organizations of all sizes can submit problem statements.
+                Connect with talented students and get fresh perspectives on
+                your real-world challenges.
               </p>
-              <Button size="lg" variant="secondary" asChild className="text-base">
+              <Button
+                size="lg"
+                variant="secondary"
+                asChild
+                className="text-base"
+              >
                 <Link to="/org/register">
                   Register Your Organization
                   <ArrowRight className="ml-2 h-5 w-5" />

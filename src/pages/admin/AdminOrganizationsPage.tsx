@@ -1,11 +1,59 @@
-import { motion } from 'framer-motion';
-import { Building2, CheckCircle, XCircle, Eye, Mail, Globe } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { mockOrganizations } from '@/data/mockData';
+import { motion } from "framer-motion";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  Building2,
+  CheckCircle,
+  XCircle,
+  Eye,
+  Mail,
+  Globe,
+  Loader2,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "@/components/ui/sonner";
+import { api, type Organization } from "@/lib/api";
 
 export default function AdminOrganizationsPage() {
+  const queryClient = useQueryClient();
+
+  const { data: response, isLoading } = useQuery({
+    queryKey: ["admin", "organizations"],
+    queryFn: () => api.admin.getOrganizations(),
+  });
+
+  const organizations = response?.organizations ?? [];
+
+  const verifyMutation = useMutation({
+    mutationFn: ({ id, verified }: { id: string; verified: boolean }) =>
+      api.admin.verifyOrganization(id, verified),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "organizations"] });
+      toast.success(
+        variables.verified ? "Organization Verified" : "Verification Removed",
+        {
+          description: variables.verified
+            ? "The organization is now verified."
+            : "The organization verification has been removed.",
+        },
+      );
+    },
+    onError: () => {
+      toast.error("Error", {
+        description: "Failed to update organization",
+      });
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   return (
     <div>
       {/* Header */}
@@ -15,13 +63,15 @@ export default function AdminOrganizationsPage() {
         </div>
         <div>
           <h1 className="text-2xl font-display font-bold">Organizations</h1>
-          <p className="text-muted-foreground">{mockOrganizations.length} registered organizations</p>
+          <p className="text-muted-foreground">
+            {organizations.length} registered organizations
+          </p>
         </div>
       </div>
 
       {/* Organizations Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {mockOrganizations.map((org, index) => (
+        {organizations.map((org, index) => (
           <motion.div
             key={org.id}
             initial={{ opacity: 0, y: 20 }}
@@ -59,20 +109,40 @@ export default function AdminOrganizationsPage() {
                   {org.website && (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Globe className="h-4 w-4" />
-                      <a href={org.website} className="truncate hover:text-foreground transition-colors">
-                        {org.website.replace('https://', '')}
+                      <a
+                        href={org.website}
+                        className="truncate hover:text-foreground transition-colors"
+                      >
+                        {org.website.replace("https://", "")}
                       </a>
                     </div>
                   )}
                 </div>
 
                 <div className="flex gap-2 mt-4 pt-4 border-t">
-                  <Button variant="outline" size="sm" className="flex-1">
-                    <Eye className="h-4 w-4 mr-2" />
-                    View
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex-1">
-                    Problems
+                  <Button
+                    variant={org.verified ? "outline" : "default"}
+                    size="sm"
+                    className="flex-1"
+                    onClick={() =>
+                      verifyMutation.mutate({
+                        id: org.id,
+                        verified: !org.verified,
+                      })
+                    }
+                    disabled={verifyMutation.isPending}
+                  >
+                    {org.verified ? (
+                      <>
+                        <XCircle className="h-4 w-4 mr-2" />
+                        Unverify
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Verify
+                      </>
+                    )}
                   </Button>
                 </div>
               </CardContent>
@@ -80,6 +150,17 @@ export default function AdminOrganizationsPage() {
           </motion.div>
         ))}
       </div>
+
+      {organizations.length === 0 && (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">
+              No organizations registered yet.
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

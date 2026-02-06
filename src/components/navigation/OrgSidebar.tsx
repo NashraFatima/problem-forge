@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   FileText,
@@ -6,15 +6,15 @@ import {
   Building2,
   LogOut,
   Zap,
-} from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
+} from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 
 const navItems = [
-  { href: '/org', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/org/problems', icon: FileText, label: 'My Problem Statements' },
-  { href: '/org/submit', icon: PlusCircle, label: 'Submit New' },
-  { href: '/org/profile', icon: Building2, label: 'Organization Profile' },
+  { href: "/org", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/org/problems", icon: FileText, label: "My Problem Statements" },
+  { href: "/org/submit", icon: PlusCircle, label: "Submit New" },
+  { href: "/org/profile", icon: Building2, label: "Organization Profile" },
 ];
 
 export function OrgSidebar() {
@@ -24,7 +24,7 @@ export function OrgSidebar() {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate("/");
   };
 
   return (
@@ -36,8 +36,12 @@ export function OrgSidebar() {
             <Zap className="h-5 w-5 text-sidebar-primary-foreground" />
           </div>
           <div>
-            <span className="font-display text-lg font-bold text-sidebar-foreground">DevUp</span>
-            <span className="block text-xs text-sidebar-foreground/60">Organization Portal</span>
+            <span className="font-display text-lg font-bold text-sidebar-foreground">
+              DevThon
+            </span>
+            <span className="block text-xs text-sidebar-foreground/60">
+              Organization Portal
+            </span>
           </div>
         </div>
 
@@ -51,8 +55,8 @@ export function OrgSidebar() {
                 to={item.href}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-sidebar-accent text-sidebar-primary'
-                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+                    ? "bg-sidebar-accent text-sidebar-primary"
+                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                 }`}
               >
                 <item.icon className="h-5 w-5" />
@@ -69,8 +73,12 @@ export function OrgSidebar() {
               <Building2 className="h-5 w-5 text-sidebar-foreground/70" />
             </div>
             <div>
-              <p className="text-sm font-medium text-sidebar-foreground">{user?.name || 'Organization'}</p>
-              <p className="text-xs text-sidebar-foreground/60">{user?.email}</p>
+              <p className="text-sm font-medium text-sidebar-foreground">
+                {user?.name || "Organization"}
+              </p>
+              <p className="text-xs text-sidebar-foreground/60">
+                {user?.email}
+              </p>
             </div>
           </div>
           <Button

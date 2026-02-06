@@ -1,22 +1,37 @@
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { mockProblems } from '@/data/mockData';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, Eye, Edit, Code, Cpu } from 'lucide-react';
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PlusCircle, Eye, Edit, Code, Cpu, Loader2 } from "lucide-react";
+import { api } from "@/lib/api";
 
 export default function OrgProblemsPage() {
-  // Filter problems for this org (mock: org-1)
-  const orgProblems = mockProblems.filter(p => p.organizationId === 'org-1');
+  const { data: orgProblems = [], isLoading } = useQuery({
+    queryKey: ["org", "problems"],
+    queryFn: () => api.org.getProblems(),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-display font-bold mb-1">My Problem Statements</h1>
-          <p className="text-muted-foreground">View and manage your submitted problem statements</p>
+          <h1 className="text-2xl font-display font-bold mb-1">
+            My Problem Statements
+          </h1>
+          <p className="text-muted-foreground">
+            View and manage your submitted problem statements
+          </p>
         </div>
         <Button asChild>
           <Link to="/org/submit">
@@ -40,27 +55,50 @@ export default function OrgProblemsPage() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <Badge className={problem.track === 'software' ? 'track-badge-software' : 'track-badge-hardware'}>
-                        {problem.track === 'software' ? <Code className="h-3 w-3 mr-1" /> : <Cpu className="h-3 w-3 mr-1" />}
+                      <Badge
+                        className={
+                          problem.track === "software"
+                            ? "track-badge-software"
+                            : "track-badge-hardware"
+                        }
+                      >
+                        {problem.track === "software" ? (
+                          <Code className="h-3 w-3 mr-1" />
+                        ) : (
+                          <Cpu className="h-3 w-3 mr-1" />
+                        )}
                         {problem.track}
                       </Badge>
-                      <Badge className={
-                        problem.status === 'approved' ? 'status-badge-approved' :
-                        problem.status === 'pending' ? 'status-badge-pending' :
-                        'status-badge-rejected'
-                      }>
+                      <Badge
+                        className={
+                          problem.status === "approved"
+                            ? "status-badge-approved"
+                            : problem.status === "pending"
+                              ? "status-badge-pending"
+                              : "status-badge-rejected"
+                        }
+                      >
                         {problem.status}
                       </Badge>
-                      <Badge variant="outline" className={
-                        problem.difficulty === 'easy' ? 'border-success text-success' :
-                        problem.difficulty === 'medium' ? 'border-warning text-warning' :
-                        'border-destructive text-destructive'
-                      }>
+                      <Badge
+                        variant="outline"
+                        className={
+                          problem.difficulty === "easy"
+                            ? "border-success text-success"
+                            : problem.difficulty === "medium"
+                              ? "border-warning text-warning"
+                              : "border-destructive text-destructive"
+                        }
+                      >
                         {problem.difficulty}
                       </Badge>
                     </div>
-                    <h3 className="font-semibold text-lg mb-1">{problem.title}</h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2">{problem.description}</p>
+                    <h3 className="font-semibold text-lg mb-1">
+                      {problem.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {problem.description}
+                    </p>
                     <p className="text-xs text-muted-foreground mt-2">
                       Category: {problem.category}
                     </p>
@@ -70,7 +108,7 @@ export default function OrgProblemsPage() {
                     <Button variant="ghost" size="icon">
                       <Eye className="h-4 w-4" />
                     </Button>
-                    {problem.status === 'pending' && (
+                    {problem.status === "pending" && (
                       <Button variant="ghost" size="icon">
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -85,7 +123,9 @@ export default function OrgProblemsPage() {
         {orgProblems.length === 0 && (
           <Card>
             <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground mb-4">You haven't submitted any problem statements yet.</p>
+              <p className="text-muted-foreground mb-4">
+                You haven't submitted any problem statements yet.
+              </p>
               <Button asChild>
                 <Link to="/org/submit">Submit Your First Problem</Link>
               </Button>

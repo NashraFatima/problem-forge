@@ -1,5 +1,6 @@
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import {
   FileText,
   Clock,
@@ -8,23 +9,50 @@ import {
   PlusCircle,
   TrendingUp,
   ArrowRight,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { mockProblems } from '@/data/mockData';
+  Loader2,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { api } from "@/lib/api";
 
 export default function OrgDashboard() {
-  // Filter problems for this org (mock: org-1)
-  const orgProblems = mockProblems.filter(p => p.organizationId === 'org-1');
-  const pendingCount = orgProblems.filter(p => p.status === 'pending').length;
-  const approvedCount = orgProblems.filter(p => p.status === 'approved').length;
-  const rejectedCount = orgProblems.filter(p => p.status === 'rejected').length;
+  const { data: dashboardData, isLoading: isLoadingDashboard } = useQuery({
+    queryKey: ["org", "dashboard"],
+    queryFn: () => api.org.getDashboard(),
+  });
+
+  const { data: orgProblems = [], isLoading: isLoadingProblems } = useQuery({
+    queryKey: ["org", "problems"],
+    queryFn: () => api.org.getProblems(),
+  });
+
+  const isLoading = isLoadingDashboard || isLoadingProblems;
 
   const stats = [
-    { label: 'Total Submissions', value: orgProblems.length, icon: FileText, color: 'text-primary' },
-    { label: 'Pending Review', value: pendingCount, icon: Clock, color: 'text-pending' },
-    { label: 'Approved', value: approvedCount, icon: CheckCircle, color: 'text-success' },
-    { label: 'Rejected', value: rejectedCount, icon: XCircle, color: 'text-destructive' },
+    {
+      label: "Total Submissions",
+      value: dashboardData?.totalProblems ?? 0,
+      icon: FileText,
+      color: "text-primary",
+    },
+    {
+      label: "Pending Review",
+      value: dashboardData?.pendingProblems ?? 0,
+      icon: Clock,
+      color: "text-pending",
+    },
+    {
+      label: "Approved",
+      value: dashboardData?.approvedProblems ?? 0,
+      icon: CheckCircle,
+      color: "text-success",
+    },
+    {
+      label: "Rejected",
+      value: dashboardData?.rejectedProblems ?? 0,
+      icon: XCircle,
+      color: "text-destructive",
+    },
   ];
 
   return (
@@ -32,8 +60,12 @@ export default function OrgDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-display font-bold mb-1">Organization Dashboard</h1>
-          <p className="text-muted-foreground">Manage your problem statement submissions</p>
+          <h1 className="text-2xl font-display font-bold mb-1">
+            Organization Dashboard
+          </h1>
+          <p className="text-muted-foreground">
+            Manage your problem statement submissions
+          </p>
         </div>
         <Button asChild>
           <Link to="/org/submit">
@@ -56,10 +88,16 @@ export default function OrgDashboard() {
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">{stat.label}</p>
-                    <p className="text-3xl font-display font-bold mt-1">{stat.value}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {stat.label}
+                    </p>
+                    <p className="text-3xl font-display font-bold mt-1">
+                      {stat.value}
+                    </p>
                   </div>
-                  <div className={`w-12 h-12 rounded-xl bg-muted flex items-center justify-center ${stat.color}`}>
+                  <div
+                    className={`w-12 h-12 rounded-xl bg-muted flex items-center justify-center ${stat.color}`}
+                  >
                     <stat.icon className="h-6 w-6" />
                   </div>
                 </div>
@@ -90,20 +128,31 @@ export default function OrgDashboard() {
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{problem.title}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      problem.track === 'software' ? 'track-badge-software' : 'track-badge-hardware'
-                    }`}>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full ${
+                        problem.track === "software"
+                          ? "track-badge-software"
+                          : "track-badge-hardware"
+                      }`}
+                    >
                       {problem.track}
                     </span>
-                    <span className="text-xs text-muted-foreground">{problem.category}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {problem.category}
+                    </span>
                   </div>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  problem.status === 'approved' ? 'status-badge-approved' :
-                  problem.status === 'pending' ? 'status-badge-pending' :
-                  'status-badge-rejected'
-                }`}>
-                  {problem.status.charAt(0).toUpperCase() + problem.status.slice(1)}
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    problem.status === "approved"
+                      ? "status-badge-approved"
+                      : problem.status === "pending"
+                        ? "status-badge-pending"
+                        : "status-badge-rejected"
+                  }`}
+                >
+                  {problem.status.charAt(0).toUpperCase() +
+                    problem.status.slice(1)}
                 </span>
               </div>
             ))}
@@ -111,7 +160,9 @@ export default function OrgDashboard() {
             {orgProblems.length === 0 && (
               <div className="text-center py-8">
                 <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground mb-4">No problem statements submitted yet</p>
+                <p className="text-muted-foreground mb-4">
+                  No problem statements submitted yet
+                </p>
                 <Button asChild>
                   <Link to="/org/submit">Submit Your First Problem</Link>
                 </Button>

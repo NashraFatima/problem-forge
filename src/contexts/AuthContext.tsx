@@ -1,73 +1,123 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User, UserRole } from '@/types';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+  useCallback,
+} from "react";
+import {
+  api,
+  type UserData,
+  type AuthResponse,
+  type LoginInput,
+  type RegisterInput,
+  setAuthData,
+  clearAuthData,
+  getAuthData,
+} from "@/lib/api";
+
+type UserRole = "admin" | "organization" | "public";
 
 interface AuthContextType {
-  user: User | null;
+  user: UserData | null;
   role: UserRole;
   isAuthenticated: boolean;
+  isLoading: boolean;
+  organization: AuthResponse["organization"] | null;
   login: (email: string, password: string, role: UserRole) => Promise<void>;
+  register: (data: RegisterInput) => Promise<void>;
   logout: () => void;
-  setMockRole: (role: UserRole) => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users for demo
-const mockUsers: Record<UserRole, User> = {
-  admin: {
-    id: 'admin-1',
-    email: 'admin@devup.org',
-    name: 'Admin User',
-    role: 'admin',
-    createdAt: new Date(),
-  },
-  organization: {
-    id: 'org-user-1',
-    email: 'org@techcorp.com',
-    name: 'TechCorp Team',
-    role: 'organization',
-    createdAt: new Date(),
-  },
-  student: {
-    id: 'student-1',
-    email: 'student@university.edu',
-    name: 'Student User',
-    role: 'student',
-    createdAt: new Date(),
-  },
-  public: {
-    id: 'public-1',
-    email: '',
-    name: 'Guest',
-    role: 'public',
-    createdAt: new Date(),
-  },
-};
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [role, setRole] = useState<UserRole>('public');
+  const [user, setUser] = useState<UserData | null>(null);
+  const [organization, setOrganization] = useState<
+    AuthResponse["organization"] | null
+  >(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = async (email: string, password: string, loginRole: UserRole) => {
-    // Mock login - in production, this would call Supabase auth
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const mockUser = mockUsers[loginRole];
-    setUser({ ...mockUser, email });
-    setRole(loginRole);
+  const role: UserRole = user?.role || "public";
+  const isAuthenticated = !!user && role !== "public";
+
+  const initializeAuth = useCallback(async () => {
+    const storedAuth = getAuthData();
+
+    if (storedAuth?.tokens?.accessToken) {
+      try {
+        const userData = await api.auth.me();
+        setUser(userData);
+        setOrganization(userData.organization || null);
+      } catch {
+        clearAuthData();
+        setUser(null);
+        setOrganization(null);
+      }
+    }
+
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
+
+  useEffect(() => {
+    const handleLogout = () => {
+      setUser(null);
+      setOrganization(null);
+    };
+
+    window.addEventListener("auth:logout", handleLogout);
+    return () => window.removeEventListener("auth:logout", handleLogout);
+  }, []);
+
+  const login = async (
+    email: string,
+    password: string,
+    loginRole: UserRole,
+  ) => {
+    const credentials: LoginInput = { email, password };
+
+    let response: AuthResponse;
+
+    if (loginRole === "admin") {
+      response = await api.auth.loginAdmin(credentials);
+    } else {
+      response = await api.auth.loginOrganization(credentials);
+    }
+
+    setAuthData(response);
+    setUser(response.user);
+    setOrganization(response.organization || null);
+  };
+
+  const register = async (data: RegisterInput) => {
+    const response = await api.auth.register(data);
+
+    setAuthData(response);
+    setUser(response.user);
+    setOrganization(response.organization || null);
   };
 
   const logout = () => {
+    api.auth.logout().catch(() => {});
+    clearAuthData();
     setUser(null);
-    setRole('public');
+    setOrganization(null);
   };
 
-  const setMockRole = (newRole: UserRole) => {
-    if (newRole === 'public') {
-      setUser(null);
-    } else {
-      setUser(mockUsers[newRole]);
+  const refreshUser = async () => {
+    try {
+      const userData = await api.auth.me();
+      setUser(userData);
+      setOrganization(userData.organization || null);
+    } catch {
+      logout();
     }
-    setRole(newRole);
   };
 
   return (
@@ -75,10 +125,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         role,
-        isAuthenticated: !!user && role !== 'public',
+        isAuthenticated,
+        isLoading,
+        organization,
         login,
+        register,
         logout,
-        setMockRole,
+        refreshUser,
       }}
     >
       {children}
@@ -89,7 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

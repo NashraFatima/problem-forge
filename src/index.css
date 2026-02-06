@@ -1,8 +1,8 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 @layer base {
   :root {
@@ -44,7 +44,7 @@
     --software: 175 80% 40%;
     --software-light: 175 70% 95%;
     --software-foreground: 175 80% 25%;
-    
+
     --hardware: 32 95% 50%;
     --hardware-light: 32 90% 95%;
     --hardware-foreground: 32 90% 30%;
@@ -53,26 +53,48 @@
     --success: 142 72% 40%;
     --success-light: 142 60% 94%;
     --success-foreground: 142 72% 25%;
-    
+
     --warning: 45 93% 47%;
     --warning-light: 45 90% 94%;
     --warning-foreground: 45 90% 25%;
-    
+
     --pending: 220 70% 50%;
     --pending-light: 220 70% 95%;
     --pending-foreground: 220 70% 30%;
 
     /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(222 84% 45%) 0%, hsl(175 80% 40%) 100%);
-    --gradient-software: linear-gradient(135deg, hsl(175 80% 40%) 0%, hsl(175 60% 50%) 100%);
-    --gradient-hardware: linear-gradient(135deg, hsl(32 95% 50%) 0%, hsl(32 80% 60%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(220 20% 98%) 100%);
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(222 84% 45%) 0%,
+      hsl(175 80% 40%) 100%
+    );
+    --gradient-software: linear-gradient(
+      135deg,
+      hsl(175 80% 40%) 0%,
+      hsl(175 60% 50%) 100%
+    );
+    --gradient-hardware: linear-gradient(
+      135deg,
+      hsl(32 95% 50%) 0%,
+      hsl(32 80% 60%) 100%
+    );
+    --gradient-card: linear-gradient(
+      180deg,
+      hsl(0 0% 100%) 0%,
+      hsl(220 20% 98%) 100%
+    );
 
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 hsl(220 20% 10% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(220 20% 10% / 0.08), 0 2px 4px -2px hsl(220 20% 10% / 0.04);
-    --shadow-lg: 0 10px 15px -3px hsl(220 20% 10% / 0.08), 0 4px 6px -4px hsl(220 20% 10% / 0.04);
-    --shadow-xl: 0 20px 25px -5px hsl(220 20% 10% / 0.1), 0 8px 10px -6px hsl(220 20% 10% / 0.08);
+    --shadow-md:
+      0 4px 6px -1px hsl(220 20% 10% / 0.08),
+      0 2px 4px -2px hsl(220 20% 10% / 0.04);
+    --shadow-lg:
+      0 10px 15px -3px hsl(220 20% 10% / 0.08),
+      0 4px 6px -4px hsl(220 20% 10% / 0.04);
+    --shadow-xl:
+      0 20px 25px -5px hsl(220 20% 10% / 0.1),
+      0 8px 10px -6px hsl(220 20% 10% / 0.08);
     --shadow-glow: 0 0 40px hsl(222 84% 45% / 0.15);
 
     /* Sidebar (Admin & Org panels) */
@@ -140,7 +162,12 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-display tracking-tight;
   }
 }

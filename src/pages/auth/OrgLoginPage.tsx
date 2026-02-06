@@ -1,42 +1,49 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Zap, Mail, Lock, Building2, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Zap, Mail, Lock, Building2, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/components/ui/sonner";
+import { ApiError } from "@/lib/api";
 
 export default function OrgLoginPage() {
   const navigate = useNavigate();
-  const { login, setMockRole } = useAuth();
-  const { toast } = useToast();
+  const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+    setError(null);
+
     try {
-      await login(email, password, 'organization');
-      toast({ title: 'Welcome back!', description: 'You have successfully logged in.' });
-      navigate('/org');
-    } catch (error) {
-      toast({ title: 'Error', description: 'Invalid credentials', variant: 'destructive' });
+      await login(email, password, "organization");
+      toast.success("Welcome back!", {
+        description: "You have successfully logged in.",
+      });
+      navigate("/org");
+    } catch (err) {
+      const message =
+        err instanceof ApiError ? err.message : "Invalid credentials";
+      setError(message);
+      toast.error("Login Failed", { description: message });
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleDemoLogin = () => {
-    setMockRole('organization');
-    toast({ title: 'Demo Mode', description: 'Logged in as demo organization.' });
-    navigate('/org');
   };
 
   return (
@@ -62,7 +69,9 @@ export default function OrgLoginPage() {
             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
               <Building2 className="h-6 w-6 text-primary" />
             </div>
-            <CardTitle className="text-2xl font-display">Organization Login</CardTitle>
+            <CardTitle className="text-2xl font-display">
+              Organization Login
+            </CardTitle>
             <CardDescription>
               Sign in to submit and manage your problem statements
             </CardDescription>
@@ -102,28 +111,23 @@ export default function OrgLoginPage() {
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Signing in...' : 'Sign In'}
+                {isLoading ? "Signing in..." : "Sign In"}
               </Button>
+
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
             </form>
 
-            <div className="relative my-6">
-              <Separator />
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">
-                or
-              </span>
-            </div>
-
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={handleDemoLogin}
-            >
-              Continue with Demo Account
-            </Button>
-
             <p className="text-center text-sm text-muted-foreground mt-6">
-              Don't have an account?{' '}
-              <Link to="/org/register" className="text-primary hover:underline font-medium">
+              Don't have an account?{" "}
+              <Link
+                to="/org/register"
+                className="text-primary hover:underline font-medium"
+              >
                 Register your organization
               </Link>
             </p>
@@ -131,7 +135,9 @@ export default function OrgLoginPage() {
         </Card>
 
         <p className="text-center text-xs text-muted-foreground mt-6">
-          <Link to="/" className="hover:underline">Back to Home</Link>
+          <Link to="/" className="hover:underline">
+            Back to Home
+          </Link>
         </p>
       </motion.div>
     </div>

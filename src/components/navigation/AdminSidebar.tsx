@@ -1,5 +1,5 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   LayoutDashboard,
   FileText,
@@ -11,17 +11,17 @@ import {
   ClipboardList,
   BarChart3,
   Shield,
-} from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+} from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 const navItems = [
-  { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/admin/problems', icon: FileText, label: 'Problem Statements' },
-  { href: '/admin/pending', icon: ClipboardList, label: 'Pending Review' },
-  { href: '/admin/organizations', icon: Users, label: 'Organizations' },
-  { href: '/admin/audit', icon: Shield, label: 'Audit Logs' },
+  { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/admin/problems", icon: FileText, label: "Problem Statements" },
+  { href: "/admin/pending", icon: ClipboardList, label: "Pending Review" },
+  { href: "/admin/organizations", icon: Users, label: "Organizations" },
+  { href: "/admin/audit", icon: Shield, label: "Audit Logs" },
 ];
 
 export function AdminSidebar() {
@@ -31,7 +31,7 @@ export function AdminSidebar() {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate("/");
   };
 
   return (
@@ -43,8 +43,12 @@ export function AdminSidebar() {
             <Zap className="h-5 w-5 text-sidebar-primary-foreground" />
           </div>
           <div>
-            <span className="font-display text-lg font-bold text-sidebar-foreground">DevUp</span>
-            <span className="block text-xs text-sidebar-foreground/60">Admin Panel</span>
+            <span className="font-display text-lg font-bold text-sidebar-foreground">
+              DevThon
+            </span>
+            <span className="block text-xs text-sidebar-foreground/60">
+              Admin Panel
+            </span>
           </div>
         </div>
 
@@ -58,8 +62,8 @@ export function AdminSidebar() {
                 to={item.href}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-sidebar-accent text-sidebar-primary'
-                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+                    ? "bg-sidebar-accent text-sidebar-primary"
+                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                 }`}
               >
                 <item.icon className="h-5 w-5" />
@@ -74,12 +78,16 @@ export function AdminSidebar() {
           <div className="flex items-center gap-3 mb-4">
             <div className="h-10 w-10 rounded-full bg-sidebar-accent flex items-center justify-center">
               <span className="text-sm font-medium text-sidebar-foreground">
-                {user?.name?.charAt(0) || 'A'}
+                {user?.name?.charAt(0) || "A"}
               </span>
             </div>
             <div>
-              <p className="text-sm font-medium text-sidebar-foreground">{user?.name || 'Admin'}</p>
-              <p className="text-xs text-sidebar-foreground/60">{user?.email}</p>
+              <p className="text-sm font-medium text-sidebar-foreground">
+                {user?.name || "Admin"}
+              </p>
+              <p className="text-xs text-sidebar-foreground/60">
+                {user?.email}
+              </p>
             </div>
           </div>
           <Button
