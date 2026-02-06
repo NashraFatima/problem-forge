@@ -1,27 +1,56 @@
-import { Outlet, Navigate } from 'react-router-dom';
-import { OrgSidebar } from '@/components/navigation/OrgSidebar';
-import { useAuth } from '@/contexts/AuthContext';
-import { motion } from 'framer-motion';
+import { useState } from "react";
+import { Outlet } from "react-router-dom";
+import { OrgSidebar } from "@/components/navigation/OrgSidebar";
+import { motion } from "framer-motion";
+import { Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export function OrgLayout() {
-  const { role, isAuthenticated } = useAuth();
-
-  // In production, this would properly check auth
-  // For demo, we allow access to show the layout
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background">
-      <OrgSidebar />
-      <motion.main
-        className="ml-64 min-h-screen"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-      >
-        <div className="p-8">
-          <Outlet />
-        </div>
-      </motion.main>
+    <div className="min-h-screen bg-background flex">
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block fixed left-0 top-0 h-screen w-64 z-40">
+        <OrgSidebar />
+      </div>
+
+      {/* Mobile Sidebar */}
+      <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+        <SheetContent
+          side="left"
+          className="p-0 w-64 border-r border-sidebar-border"
+        >
+          <OrgSidebar onNavigate={() => setIsSidebarOpen(false)} />
+        </SheetContent>
+      </Sheet>
+
+      {/* Main Content */}
+      <div className="flex-1 lg:ml-64 min-h-screen flex flex-col">
+        {/* Mobile Header */}
+        <header className="lg:hidden sticky top-0 z-30 flex items-center h-16 px-4 bg-background/80 backdrop-blur-md border-b border-border">
+          <SheetTrigger asChild onClick={() => setIsSidebarOpen(true)}>
+            <Button variant="ghost" size="icon" className="-ml-2">
+              <Menu className="h-6 w-6" />
+            </Button>
+          </SheetTrigger>
+          <span className="ml-2 font-display font-bold text-lg">
+            DevThon Org
+          </span>
+        </header>
+
+        <motion.main
+          className="flex-1"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="p-4 sm:p-6 lg:p-8">
+            <Outlet />
+          </div>
+        </motion.main>
+      </div>
     </div>
   );
 }

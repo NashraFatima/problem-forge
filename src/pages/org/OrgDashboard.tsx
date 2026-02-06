@@ -34,24 +34,28 @@ export default function OrgDashboard() {
       value: dashboardData?.totalProblems ?? 0,
       icon: FileText,
       color: "text-primary",
+      bg: "bg-primary/10",
     },
     {
       label: "Pending Review",
       value: dashboardData?.pendingProblems ?? 0,
       icon: Clock,
       color: "text-pending",
+      bg: "bg-pending/10",
     },
     {
       label: "Approved",
       value: dashboardData?.approvedProblems ?? 0,
       icon: CheckCircle,
       color: "text-success",
+      bg: "bg-success/10",
     },
     {
       label: "Rejected",
       value: dashboardData?.rejectedProblems ?? 0,
       icon: XCircle,
       color: "text-destructive",
+      bg: "bg-destructive/10",
     },
   ];
 
@@ -96,9 +100,9 @@ export default function OrgDashboard() {
                     </p>
                   </div>
                   <div
-                    className={`w-12 h-12 rounded-xl bg-muted flex items-center justify-center ${stat.color}`}
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.bg}`}
                   >
-                    <stat.icon className="h-6 w-6" />
+                    <stat.icon className={`h-6 w-6 ${stat.color}`} />
                   </div>
                 </div>
               </CardContent>

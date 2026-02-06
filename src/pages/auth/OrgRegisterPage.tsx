@@ -10,18 +10,13 @@ import {
   Globe,
   Loader2,
   AlertCircle,
+  Briefcase,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
@@ -39,7 +34,6 @@ export default function OrgRegisterPage() {
   const navigate = useNavigate();
   const { register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -57,7 +51,6 @@ export default function OrgRegisterPage() {
 
   const updateField = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear field error when user starts typing
     if (fieldErrors[field]) {
       setFieldErrors((prev) => {
         const updated = { ...prev };
@@ -78,28 +71,21 @@ export default function OrgRegisterPage() {
       errors.industry = "Please select an industry";
     }
     if (!formData.contactPerson || formData.contactPerson.length < 2) {
-      errors.contactPerson =
-        "Contact person name must be at least 2 characters";
+      errors.contactPerson = "Contact person name required";
     }
     if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = "Please enter a valid email address";
+      errors.email = "Valid email required";
     }
     if (!formData.password || formData.password.length < 8) {
-      errors.password = "Password must be at least 8 characters";
+      errors.password = "Min 8 characters";
     }
-    if (!/[A-Z]/.test(formData.password)) {
-      errors.password = "Password must contain at least one uppercase letter";
-    }
-    if (!/[a-z]/.test(formData.password)) {
-      errors.password = "Password must contain at least one lowercase letter";
-    }
-    if (!/[0-9]/.test(formData.password)) {
-      errors.password = "Password must contain at least one number";
+    if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = "Passwords do not match";
     }
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
-      setError("Please fix the errors below");
+      setError("Please fix the errors highlighted below");
       return false;
     }
 
@@ -109,20 +95,8 @@ export default function OrgRegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setFieldErrors({});
 
-    if (!validateForm()) {
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
-      setFieldErrors({ confirmPassword: "Passwords do not match" });
-      toast.error("Validation Error", {
-        description: "Passwords do not match",
-      });
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsLoading(true);
 
@@ -139,32 +113,16 @@ export default function OrgRegisterPage() {
         contactEmail: formData.contactEmail || formData.email,
       });
 
-      toast.success("Registration Successful!", {
-        description: "Welcome to DevUp! Your account has been created.",
+      toast.success("Welcome aboard!", {
+        description: "Your organization account has been created.",
       });
       navigate("/org");
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
-        if (err.errors) {
-          setFieldErrors(err.errors);
-          // Build a detailed error message
-          const errorMessages = Object.entries(err.errors)
-            .map(([field, msg]) => `${field}: ${msg}`)
-            .join(", ");
-          toast.error("Validation Failed", {
-            description: errorMessages || err.message,
-          });
-        } else {
-          toast.error("Registration Failed", {
-            description: err.message,
-          });
-        }
+        if (err.errors) setFieldErrors(err.errors);
       } else {
-        setError("Registration failed");
-        toast.error("Registration Failed", {
-          description: "An unexpected error occurred",
-        });
+        setError("Registration failed. Please try again.");
       }
     } finally {
       setIsLoading(false);
@@ -172,275 +130,261 @@ export default function OrgRegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-br from-background via-background to-accent/5">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="w-full max-w-lg"
-      >
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
-              <Zap className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="font-display text-2xl font-bold">DevUp</span>
-          </Link>
-        </div>
+    <div className="min-h-screen bg-background grid lg:grid-cols-2">
+      {/* Left Pane - Form */}
+      <div className="relative flex flex-col justify-center p-6 sm:p-12 lg:p-16">
+        <div className="w-full max-w-md mx-auto space-y-8">
+          <div className="space-y-2 text-center lg:text-left">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 text-primary font-bold font-display text-xl mb-8"
+            >
+              <Zap className="h-5 w-5" /> DevThon
+            </Link>
+            <h1 className="text-3xl font-display font-bold tracking-tight">
+              Partner Registration
+            </h1>
+            <p className="text-muted-foreground">
+              Create an account to submit problem statements and connect with
+              talent.
+            </p>
+          </div>
 
-        <Card className="shadow-lg">
-          <CardHeader className="text-center">
-            <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mx-auto mb-4">
-              <Building2 className="h-6 w-6 text-accent" />
-            </div>
-            <CardTitle className="text-2xl font-display">
-              Register Organization
-            </CardTitle>
-            <CardDescription>
-              Create an account to submit problem statements for DevThon 2026
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {/* Progress */}
-            <div className="flex gap-2 mb-6">
-              <div
-                className={`h-1 flex-1 rounded-full ${step >= 1 ? "bg-primary" : "bg-muted"}`}
-              />
-              <div
-                className={`h-1 flex-1 rounded-full ${step >= 2 ? "bg-primary" : "bg-muted"}`}
-              />
-            </div>
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {step === 1 && (
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="space-y-4"
-                >
-                  <div className="space-y-2">
-                    <Label htmlFor="organizationName">
-                      Organization Name *
-                    </Label>
-                    <div className="relative">
-                      <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="organizationName"
-                        placeholder="Your Organization"
-                        className={`pl-10 ${fieldErrors.organizationName ? "border-destructive" : ""}`}
-                        value={formData.organizationName}
-                        onChange={(e) =>
-                          updateField("organizationName", e.target.value)
-                        }
-                        required
-                      />
-                    </div>
-                    {fieldErrors.organizationName && (
-                      <p className="text-sm text-destructive">
-                        {fieldErrors.organizationName}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="industry">Industry *</Label>
-                    <Select
-                      value={formData.industry}
-                      onValueChange={(v) => updateField("industry", v)}
-                    >
-                      <SelectTrigger
-                        className={
-                          fieldErrors.industry ? "border-destructive" : ""
-                        }
-                      >
-                        <SelectValue placeholder="Select your industry" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {INDUSTRIES.map((ind) => (
-                          <SelectItem key={ind} value={ind}>
-                            {ind}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {fieldErrors.industry && (
-                      <p className="text-sm text-destructive">
-                        {fieldErrors.industry}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="website">Website</Label>
-                    <div className="relative">
-                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="website"
-                        placeholder="https://yourcompany.com"
-                        className="pl-10"
-                        value={formData.website}
-                        onChange={(e) => updateField("website", e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Brief Description</Label>
-                    <Textarea
-                      id="description"
-                      placeholder="Tell us about your organization..."
-                      rows={3}
-                      value={formData.description}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="orgName">Organization Name</Label>
+                  <div className="relative">
+                    <Building2 className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="orgName"
+                      placeholder="Acme Corp"
+                      className="pl-9"
+                      value={formData.organizationName}
                       onChange={(e) =>
-                        updateField("description", e.target.value)
+                        updateField("organizationName", e.target.value)
+                      }
+                      aria-invalid={!!fieldErrors.organizationName}
+                    />
+                  </div>
+                  {fieldErrors.organizationName && (
+                    <p className="text-xs text-destructive">
+                      {fieldErrors.organizationName}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="industry">Industry</Label>
+                  <Select
+                    value={formData.industry}
+                    onValueChange={(value) => updateField("industry", value)}
+                  >
+                    <SelectTrigger
+                      className={
+                        fieldErrors.industry ? "border-destructive" : ""
+                      }
+                    >
+                      <SelectValue placeholder="Select..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {INDUSTRIES.map((ind) => (
+                        <SelectItem key={ind} value={ind}>
+                          {ind}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {fieldErrors.industry && (
+                    <p className="text-xs text-destructive">
+                      {fieldErrors.industry}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="website">Website (Optional)</Label>
+                <div className="relative">
+                  <Globe className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="website"
+                    type="url"
+                    placeholder="https://example.com"
+                    className="pl-9"
+                    value={formData.website}
+                    onChange={(e) => updateField("website", e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="contactPerson">Contact Person</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="contactPerson"
+                      placeholder="John Doe"
+                      className="pl-9"
+                      value={formData.contactPerson}
+                      onChange={(e) =>
+                        updateField("contactPerson", e.target.value)
                       }
                     />
                   </div>
-
-                  <Button
-                    type="button"
-                    className="w-full"
-                    onClick={() => setStep(2)}
-                    disabled={!formData.organizationName || !formData.industry}
-                  >
-                    Continue
-                  </Button>
-                </motion.div>
-              )}
-
-              {step === 2 && (
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="space-y-4"
-                >
-                  <div className="space-y-2">
-                    <Label htmlFor="contactPerson">Contact Person Name *</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="contactPerson"
-                        placeholder="John Doe"
-                        className={`pl-10 ${fieldErrors.contactPerson ? "border-destructive" : ""}`}
-                        value={formData.contactPerson}
-                        onChange={(e) =>
-                          updateField("contactPerson", e.target.value)
-                        }
-                        required
-                      />
-                    </div>
-                    {fieldErrors.contactPerson && (
-                      <p className="text-sm text-destructive">
-                        {fieldErrors.contactPerson}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Official Email *</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="contact@organization.com"
-                        className={`pl-10 ${fieldErrors.email ? "border-destructive" : ""}`}
-                        value={formData.email}
-                        onChange={(e) => updateField("email", e.target.value)}
-                        required
-                      />
-                    </div>
-                    {fieldErrors.email && (
-                      <p className="text-sm text-destructive">
-                        {fieldErrors.email}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password *</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="••••••••"
-                        className={`pl-10 ${fieldErrors.password ? "border-destructive" : ""}`}
-                        value={formData.password}
-                        onChange={(e) =>
-                          updateField("password", e.target.value)
-                        }
-                        required
-                      />
-                    </div>
-                    {fieldErrors.password && (
-                      <p className="text-sm text-destructive">
-                        {fieldErrors.password}
-                      </p>
-                    )}
-                    <p className="text-xs text-muted-foreground">
-                      Min 8 chars, 1 uppercase, 1 lowercase, 1 number
+                  {fieldErrors.contactPerson && (
+                    <p className="text-xs text-destructive">
+                      {fieldErrors.contactPerson}
                     </p>
-                  </div>
+                  )}
+                </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm Password *</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="confirmPassword"
-                        type="password"
-                        placeholder="••••••••"
-                        className={`pl-10 ${fieldErrors.confirmPassword ? "border-destructive" : ""}`}
-                        value={formData.confirmPassword}
-                        onChange={(e) =>
-                          updateField("confirmPassword", e.target.value)
-                        }
-                        required
-                      />
-                    </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Work Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="john@acme.com"
+                      className="pl-9"
+                      value={formData.email}
+                      onChange={(e) => updateField("email", e.target.value)}
+                    />
                   </div>
+                  {fieldErrors.email && (
+                    <p className="text-xs text-destructive">
+                      {fieldErrors.email}
+                    </p>
+                  )}
+                </div>
+              </div>
 
-                  <div className="flex gap-3">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="flex-1"
-                      onClick={() => setStep(1)}
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      type="submit"
-                      className="flex-1"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Creating Account..." : "Create Account"}
-                    </Button>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="••••••••"
+                      className="pl-9"
+                      value={formData.password}
+                      onChange={(e) => updateField("password", e.target.value)}
+                    />
                   </div>
-                </motion.div>
-              )}
-            </form>
+                  {fieldErrors.password && (
+                    <p className="text-xs text-destructive">
+                      {fieldErrors.password}
+                    </p>
+                  )}
+                </div>
 
-            <p className="text-center text-sm text-muted-foreground mt-6">
-              Already have an account?{" "}
-              <Link
-                to="/org/login"
-                className="text-primary hover:underline font-medium"
-              >
-                Sign in
-              </Link>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="••••••••"
+                      className="pl-9"
+                      value={formData.confirmPassword}
+                      onChange={(e) =>
+                        updateField("confirmPassword", e.target.value)
+                      }
+                    />
+                  </div>
+                  {fieldErrors.confirmPassword && (
+                    <p className="text-xs text-destructive">
+                      {fieldErrors.confirmPassword}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
+              size="lg"
+              disabled={isLoading}
+            >
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Account
+            </Button>
+          </form>
+
+          <p className="text-center text-sm text-muted-foreground">
+            Already registered?{" "}
+            <Link
+              to="/org/login"
+              className="font-medium text-primary hover:underline underline-offset-4"
+            >
+              Sign in
+            </Link>
+          </p>
+        </div>
+      </div>
+
+      {/* Right Pane - Branding */}
+      <div className="hidden lg:flex relative bg-primary flex-col justify-between p-12 text-primary-foreground overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-accent opacity-90" />
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[600px] h-[600px] bg-white/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-[400px] h-[400px] bg-accent/20 rounded-full blur-3xl" />
+
+        <div className="relative z-10 mt-12">
+          <div className="h-12 w-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center mb-8">
+            <Briefcase className="h-6 w-6 text-white" />
+          </div>
+          <h2 className="text-4xl font-display font-bold leading-tight mb-6">
+            Join the ecosystem of <br />
+            future innovators.
+          </h2>
+          <div className="space-y-4 max-w-md text-primary-foreground/80">
+            <p className="flex items-start gap-3">
+              <CheckCircle2 className="h-5 w-5 mt-0.5 text-accent-foreground" />
+              <span>Connect with pre-vetted student developers</span>
             </p>
-          </CardContent>
-        </Card>
+            <p className="flex items-start gap-3">
+              <CheckCircle2 className="h-5 w-5 mt-0.5 text-accent-foreground" />
+              <span>Crowdsource solutions for R&D problems</span>
+            </p>
+            <p className="flex items-start gap-3">
+              <CheckCircle2 className="h-5 w-5 mt-0.5 text-accent-foreground" />
+              <span>Zero cost for submitting problem statements</span>
+            </p>
+          </div>
+        </div>
 
-        <p className="text-center text-xs text-muted-foreground mt-6">
-          <Link to="/" className="hover:underline">
-            Back to Home
-          </Link>
-        </p>
-      </motion.div>
+        <div className="relative z-10 bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 max-w-md">
+          <p className="text-lg italic mb-4">
+            "DevThon helped us prototype a new AI feature in just 48 hours. The
+            student team was phenomenal."
+          </p>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center font-bold text-accent-foreground">
+              S
+            </div>
+            <div>
+              <p className="font-semibold">Sarah Jenkins</p>
+              <p className="text-xs text-primary-foreground/70">
+                Product Lead, FinTech Solutions
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -15,6 +15,7 @@ import OrgLoginPage from "@/pages/auth/OrgLoginPage";
 import OrgRegisterPage from "@/pages/auth/OrgRegisterPage";
 
 // Admin Pages
+import { PublicLayout } from "@/layouts/PublicLayout";
 import { AdminLayout } from "@/layouts/AdminLayout";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminProblemsPage from "@/pages/admin/AdminProblemsPage";
@@ -48,9 +49,11 @@ function App() {
         <BrowserRouter>
           <Routes>
             {/* Public */}
-            <Route path="/" element={<HomePage />} />
-            <Route path="/problems" element={<ProblemsPage />} />
-            <Route path="/problems/:id" element={<ProblemDetailPage />} />
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/problems" element={<ProblemsPage />} />
+              <Route path="/problems/:id" element={<ProblemDetailPage />} />
+            </Route>
 
             {/* Auth */}
             <Route path="/admin/login" element={<AdminLoginPage />} />

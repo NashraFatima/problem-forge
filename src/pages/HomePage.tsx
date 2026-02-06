@@ -5,152 +5,165 @@ import {
   ArrowRight,
   Building2,
   Users,
-  Zap,
   Award,
   Globe,
   Code,
-  Cpu,
-  Loader2,
+  Sparkles,
+  Rocket,
+  BrainCircuit,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 
-const features = [
-  {
-    title: "Real-World Challenges",
-    description:
-      "Work on actual industry problems from leading companies, startups, and research labs.",
-    icon: Globe,
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
   },
-  {
-    title: "Software & Hardware Tracks",
-    description:
-      "Choose from AI, FinTech, IoT, Robotics, and many more specialized categories.",
-    icon: Cpu,
-  },
-  {
-    title: "Expert Mentorship",
-    description:
-      "Get guidance from industry professionals throughout your DevThon journey.",
-    icon: Award,
-  },
-];
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 },
+};
 
 export default function HomePage() {
-  // Fetch featured problems first, fall back to recent if none
-  const { data: featuredProblems = [], isLoading: loadingFeatured } = useQuery({
-    queryKey: ["problems", "featured"],
-    queryFn: () => api.problems.getFeatured(),
-  });
-
-  const { data: recentProblems = [], isLoading: loadingRecent } = useQuery({
-    queryKey: ["problems", "recent"],
-    queryFn: () => api.problems.getRecent(6),
-  });
-
   const { data: publicStats } = useQuery({
     queryKey: ["problems", "stats", "public"],
     queryFn: () => api.problems.getPublicStats(),
   });
 
-  // Use featured if available, otherwise show recent approved problems
-  const displayProblems =
-    featuredProblems.length > 0 ? featuredProblems : recentProblems;
-  const isLoading = loadingFeatured || loadingRecent;
-
   const stats = [
     {
-      label: "Problem Statements",
+      label: "Active Problems",
       value: publicStats ? `${publicStats.totalProblems}+` : "50+",
       icon: Code,
+      color: "text-blue-600",
+      bg: "bg-blue-100",
     },
     {
       label: "Partner Organizations",
       value: publicStats ? `${publicStats.totalOrganizations}+` : "25+",
       icon: Building2,
+      color: "text-purple-600",
+      bg: "bg-purple-100",
     },
-    { label: "Participants", value: "1000+", icon: Users },
     {
-      label: "Categories",
-      value: publicStats ? `${publicStats.totalCategories}` : "12",
+      label: "Total Participants",
+      value: "1000+",
+      icon: Users,
+      color: "text-green-600",
+      bg: "bg-green-100",
+    },
+    {
+      label: "Prize Pool",
+      value: "₹50 Lakhs+",
       icon: Award,
+      color: "text-amber-600",
+      bg: "bg-amber-100",
     },
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background font-sans selection:bg-primary/20">
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 lg:py-32">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+      <section className="relative overflow-hidden pt-32 pb-20 lg:pt-40 lg:pb-32">
+        {/* Background Decorative Elements */}
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl opacity-50 animate-pulse" />
+        <div className="absolute top-20 -left-20 w-[400px] h-[400px] bg-accent/5 rounded-full blur-3xl opacity-50" />
 
-        <div className="container relative">
+        <div className="container relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="max-w-4xl mx-auto text-center"
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className="max-w-5xl mx-auto text-center space-y-8"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-              <Zap className="h-4 w-4" />
-              Industry x Student Collaboration
-            </div>
+            <motion.div variants={item} className="flex justify-center">
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold border border-primary/20 shadow-sm backdrop-blur-sm">
+                <Sparkles className="h-3.5 w-3.5" />
+                DevThon 2026 is Here
+              </span>
+            </motion.div>
 
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold tracking-tight mb-6">
-              Solve <span className="gradient-text">Real Problems</span>
+            <motion.h1
+              variants={item}
+              className="text-4xl sm:text-5xl md:text-7xl font-display font-bold tracking-tight text-foreground leading-[1.1]"
+            >
+              Innovate for the{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+                Future
+              </span>
               <br />
-              Build Real Impact
-            </h1>
+              Solve Real Problems.
+            </motion.h1>
 
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-              Connect with leading organizations and tackle industry-grade
-              challenges. Choose from software and hardware tracks designed for
-              the next generation of innovators.
-            </p>
+            <motion.p
+              variants={item}
+              className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
+            >
+              The ultimate platform connecting visionary organizations with
+              talented developers. Tackle industry-grade challenges and showcase
+              your innovation at{" "}
+              <span className="font-semibold text-foreground">
+                DevThon 2026
+              </span>
+              .
+            </motion.p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" asChild className="text-base px-8">
+            <motion.div
+              variants={item}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
+            >
+              <Button
+                size="lg"
+                className="h-14 px-8 text-lg rounded-full shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all"
+                asChild
+              >
                 <Link to="/problems">
-                  Browse Problems
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  Browse Statements <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
               <Button
                 size="lg"
                 variant="outline"
+                className="h-14 px-8 text-lg rounded-full border-primary/20 hover:bg-primary/5 transition-all"
                 asChild
-                className="text-base px-8"
               >
-                <Link to="/org/register">
-                  <Building2 className="mr-2 h-5 w-5" />
-                  Submit a Challenge
-                </Link>
+                <Link to="/org/register">Submit a Problem</Link>
               </Button>
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 border-y border-border bg-card">
+      <section className="py-12 border-y border-border/40 bg-muted/30">
         <div className="container">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
+            {stats.map((stat, i) => (
               <motion.div
-                key={stat.label}
+                key={i}
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
-                className="text-center"
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="flex flex-col items-center justify-center text-center p-4 rounded-2xl hover:bg-background hover:shadow-lg transition-all duration-300 group"
               >
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 mb-4">
-                  <stat.icon className="h-6 w-6 text-primary" />
+                <div
+                  className={`p-4 rounded-2xl ${stat.bg} mb-4 group-hover:scale-110 transition-transform`}
+                >
+                  <stat.icon className={`h-8 w-8 ${stat.color}`} />
                 </div>
-                <p className="text-3xl md:text-4xl font-display font-bold text-foreground">
+                <h3 className="text-3xl font-bold font-display text-foreground mb-1">
                   {stat.value}
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">
+                </h3>
+                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
                   {stat.label}
                 </p>
               </motion.div>
@@ -159,162 +172,201 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20">
-        <div className="container">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-              Why Participate?
+      {/* Value Proposition */}
+      <section className="py-24 lg:py-32 bg-background relative overflow-hidden">
+        <div className="container relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <h2 className="text-3xl md:text-5xl font-display font-bold mb-6">
+              Why Participate in DevThon?
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Join a platform that bridges the gap between academic learning and
-              industry needs.
+            <p className="text-lg text-muted-foreground">
+              Whether you are a student developer or an industry leader, DevThon
+              offers unique opportunities to innovate and grow.
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
+            {[
+              {
+                icon: BrainCircuit,
+                title: "Challenging Problems",
+                desc: "Don't just build toy apps. Work on complex, real-world issues submitted by top organizations that require deep technical thinking.",
+                color: "text-primary",
+              },
+              {
+                icon: Rocket,
+                title: "Career Launchpad",
+                desc: "Showcase your skills directly to potential employers. Top performing teams often get internship and job offers.",
+                color: "text-accent",
+              },
+              {
+                icon: Globe,
+                title: "Global Impact",
+                desc: "Your solutions have the potential to scale. We partner with NGOs and Gov bodies to implement winning ideas.",
+                color: "text-blue-500",
+              },
+            ].map((feature, i) => (
               <motion.div
-                key={feature.title}
+                key={i}
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.2 + index * 0.1 }}
-                className="p-6 rounded-2xl bg-card border border-border shadow-card hover:shadow-card-hover transition-shadow"
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="p-8 rounded-2xl border border-border/50 bg-card hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"
               >
-                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4">
-                  <feature.icon className="h-6 w-6 text-accent" />
+                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
+                  <feature.icon className={`h-8 w-8 ${feature.color}`} />
                 </div>
-                <h3 className="text-xl font-display font-semibold mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-muted-foreground">{feature.description}</p>
+                <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {feature.desc}
+                </p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Featured/Recent Problems */}
-      <section className="py-20 bg-muted/30">
-        <div className="container">
-          <div className="flex items-center justify-between mb-12">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-display font-bold mb-2">
-                {featuredProblems.length > 0
-                  ? "Featured Challenges"
-                  : "Latest Challenges"}
+      {/* For Organizations Section */}
+      <section className="py-24 bg-foreground text-background relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[100px]" />
+
+        <div className="container relative z-10">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="space-y-8">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-white text-sm font-medium backdrop-blur-sm border border-white/20">
+                <Building2 className="h-4 w-4" /> For Organizations
+              </div>
+              <h2 className="text-4xl md:text-5xl font-display font-bold leading-tight">
+                Source Innovation from the Next Gen Talent
               </h2>
-              <p className="text-muted-foreground">
-                {featuredProblems.length > 0
-                  ? "Hand-picked problem statements from our partner organizations"
-                  : "Recent problem statements from our partner organizations"}
+              <p className="text-lg text-gray-400">
+                Submit your most pressing technical challenges and have hundreds
+                of bright minds work on them over an intense 48-hour hackathon.
               </p>
-            </div>
-            <Button variant="outline" asChild>
-              <Link to="/problems">
-                View All
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {isLoading
-              ? [1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="h-48 rounded-2xl bg-muted animate-pulse"
-                  />
-                ))
-              : displayProblems.slice(0, 6).map((problem, index) => (
-                  <motion.div
-                    key={problem.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
-                  >
-                    <Link
-                      to={`/problems/${problem.id}`}
-                      className="block p-6 rounded-2xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all group"
-                    >
-                      <div className="flex items-center gap-2 mb-4">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            problem.track === "software"
-                              ? "track-badge-software"
-                              : "track-badge-hardware"
-                          }`}
-                        >
-                          {problem.track === "software"
-                            ? "Software"
-                            : "Hardware"}
-                        </span>
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            problem.difficulty === "easy"
-                              ? "bg-success-light text-success-foreground"
-                              : problem.difficulty === "medium"
-                                ? "bg-warning-light text-warning-foreground"
-                                : "bg-destructive/10 text-destructive"
-                          }`}
-                        >
-                          {problem.difficulty.charAt(0).toUpperCase() +
-                            problem.difficulty.slice(1)}
-                        </span>
-                      </div>
-
-                      <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                        {problem.title}
-                      </h3>
-
-                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                        {problem.description}
-                      </p>
-
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">
-                          {problem.organization.name}
-                        </span>
-                        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                      </div>
-                    </Link>
-                  </motion.div>
+              <ul className="space-y-4">
+                {[
+                  "Access to top-tier developer talent",
+                  "Rapid prototyping of new ideas",
+                  "Brand visibility among tech community",
+                  "Keep IP rights to solutions",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3">
+                    <CheckCircle2 className="h-6 w-6 text-primary" />
+                    <span className="text-lg">{item}</span>
+                  </li>
                 ))}
+              </ul>
+
+              <Button
+                size="lg"
+                className="h-14 px-8 rounded-full bg-white text-foreground hover:bg-gray-100 mt-4"
+                asChild
+              >
+                <Link to="/org/register">Register as Organization</Link>
+              </Button>
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-tr from-primary to-accent opacity-20 rounded-3xl blur-xl" />
+              <div className="relative bg-background/10 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-12">
+                <div className="space-y-6">
+                  <div className="h-2 w-20 bg-primary rounded-full" />
+                  <h3 className="text-2xl font-bold text-white">
+                    "We found our best hires through DevThon."
+                  </h3>
+                  <p className="text-gray-300 italic">
+                    "The quality of solutions presented was beyond our
+                    expectations. Two of the winning team members are now
+                    leading our R&D division."
+                  </p>
+                  <div className="flex items-center gap-4 pt-4 border-t border-white/10">
+                    <div className="h-12 w-12 rounded-full bg-white/20 flex items-center justify-center text-white font-bold">
+                      FS
+                    </div>
+                    <div>
+                      <div className="font-bold text-white">Faizan Sk</div>
+                      <div className="text-sm text-gray-400">
+                        CEO, DevUp Society .inc
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20">
+      <section className="py-24">
         <div className="container">
-          <div
-            className="relative rounded-3xl overflow-hidden p-12 md:p-16 text-center"
-            style={{ background: "var(--gradient-hero)" }}
-          >
-            <div className="relative z-10">
-              <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">
-                Have a Challenge for Students?
+          <div className="relative rounded-[2.5rem] overflow-hidden bg-primary px-6 py-20 text-center md:px-20 text-primary-foreground">
+            <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-10" />
+            <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-accent/30 blur-3xl" />
+
+            <div className="relative z-10 max-w-3xl mx-auto space-y-8">
+              <h2 className="text-4xl md:text-5xl font-display font-bold">
+                Ready to make a difference?
               </h2>
-              <p className="text-white/80 max-w-2xl mx-auto mb-8">
-                Organizations of all sizes can submit problem statements.
-                Connect with talented students and get fresh perspectives on
-                your real-world challenges.
+              <p className="text-lg md:text-xl text-primary-foreground/80">
+                Join thousands of developers and organizations in the biggest
+                problem solving event of the year.
               </p>
-              <Button
-                size="lg"
-                variant="secondary"
-                asChild
-                className="text-base"
-              >
-                <Link to="/org/register">
-                  Register Your Organization
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="h-14 px-8 text-lg rounded-full text-primary"
+                  asChild
+                >
+                  <Link to="/problems">Explore Problems</Link>
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-14 px-8 text-lg rounded-full bg-transparent border-primary-foreground/30 hover:bg-primary-foreground/10 text-primary-foreground"
+                  asChild
+                >
+                  <Link to="/org/register">Partner with us</Link>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
       </section>
+
+      <footer className="py-12 bg-muted/30 border-t border-border">
+        <div className="container md:flex justify-between items-center text-center md:text-left">
+          <div className="mb-6 md:mb-0">
+            <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+                <ArrowRight className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <span className="font-display text-xl font-bold">DevThon</span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              © 2026 DevUp Society. All rights reserved.
+            </p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground font-medium">
+            <Link to="#" className="hover:text-foreground">
+              About
+            </Link>
+            <Link to="#" className="hover:text-foreground">
+              Sponsorship
+            </Link>
+            <Link to="#" className="hover:text-foreground">
+              Code of Conduct
+            </Link>
+            <Link to="#" className="hover:text-foreground">
+              Privacy
+            </Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
