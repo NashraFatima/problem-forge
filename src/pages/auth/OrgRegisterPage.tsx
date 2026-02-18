@@ -374,12 +374,12 @@ export default function OrgRegisterPage() {
           </p>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center font-bold text-accent-foreground">
-              S
+              F
             </div>
             <div>
-              <p className="font-semibold">Sarah Jenkins</p>
+              <p className="font-semibold">Faizan Sk</p>
               <p className="text-xs text-primary-foreground/70">
-                Product Lead, FinTech Solutions
+                Leading Community Board, DevUp Society
               </p>
             </div>
           </div>

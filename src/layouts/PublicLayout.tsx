@@ -1,40 +1,43 @@
-import { Outlet } from 'react-router-dom';
-import { PublicNav } from '@/components/navigation/PublicNav';
-import { motion } from 'framer-motion';
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { PublicNav } from "@/components/navigation/PublicNav";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 export function PublicLayout() {
+  const navigate = useNavigate();
+  const location = useLocation();
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       <PublicNav />
-      <motion.main
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-      >
-        <Outlet />
-      </motion.main>
-      
-      {/* Footer */}
-      <footer className="border-t border-border bg-card">
-        <div className="container py-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground">
-              © 2025 DevUp Society. All rights reserved.
-            </p>
-            <div className="flex gap-6">
-              <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Privacy Policy
-              </a>
-              <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Terms of Service
-              </a>
-              <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Contact
-              </a>
-            </div>
-          </div>
+
+      {/* Back button for easier navigation (hidden on home) */}
+      {location.pathname !== "/" && (
+        <div className="px-4 pt-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
         </div>
-      </footer>
+      )}
+
+      <main className="flex-grow">
+        <AnimatePresence mode="wait">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Outlet />
+          </motion.div>
+        </AnimatePresence>
+      </main>
     </div>
   );
 }

@@ -16,25 +16,24 @@ export function OrgLayout() {
         <OrgSidebar />
       </div>
 
-      {/* Mobile Sidebar */}
-      <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <SheetContent
-          side="left"
-          className="p-0 w-64 border-r border-sidebar-border"
-        >
-          <OrgSidebar onNavigate={() => setIsSidebarOpen(false)} />
-        </SheetContent>
-      </Sheet>
-
       {/* Main Content */}
       <div className="flex-1 lg:ml-64 min-h-screen flex flex-col">
         {/* Mobile Header */}
         <header className="lg:hidden sticky top-0 z-30 flex items-center h-16 px-4 bg-background/80 backdrop-blur-md border-b border-border">
-          <SheetTrigger asChild onClick={() => setIsSidebarOpen(true)}>
-            <Button variant="ghost" size="icon" className="-ml-2">
-              <Menu className="h-6 w-6" />
-            </Button>
-          </SheetTrigger>
+          {/* Mobile Sidebar */}
+          <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="-ml-2">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent
+              side="left"
+              className="p-0 w-64 border-r border-sidebar-border"
+            >
+              <OrgSidebar onNavigate={() => setIsSidebarOpen(false)} />
+            </SheetContent>
+          </Sheet>
           <span className="ml-2 font-display font-bold text-lg">
             DevThon Org
           </span>
